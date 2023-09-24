@@ -27,12 +27,18 @@ RUN ln -s /usr/bin/python3.10 /usr/bin/python && \
 
 # Setup virtual environment and install packages
 RUN python3 -m venv /home/vllm/venvs/vllm && \
-    . /home/vllm/venvs/vllm/bin/activate && \
-    pip install --upgrade pip && \
-    pip install --no-cache-dir "pandas>=1.3"
+    chown -R vllm:vllm /home/vllm/venvs/vllm
 
 # Switch to vllm user
 USER vllm
 
 # Define environment variable to use virtual environment
 ENV PATH="/home/vllm/venvs/vllm/bin:$PATH"
+ENV PYTHON_EXECUTABLE=python3
+ENV APP_HOME /home/vllm/
+WORKDIR $APP_HOME
+
+# Activate virtual environment and install packages
+RUN . /home/vllm/venvs/vllm/bin/activate && \
+    pip install --upgrade pip && \
+    pip install --no-cache-dir "pandas>=1.3"

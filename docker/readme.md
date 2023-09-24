@@ -1,5 +1,3 @@
-# Docker Operations with Google Cloud Artifacts Registry
-
 This guide describes the process of building and pushing a VLLM base docker image to the Google Cloud Artifacts Registry.
 
 ## Prerequisites
@@ -23,7 +21,7 @@ gcloud auth configure-docker us-central1-docker.pkg.dev
 Use the following command to build the base Docker image:
 
 ```bash
-docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/ardent-firefly-398508/llm-experiments/vllm/base:v0.1 -f docker/base.dockerfile .
+docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/ardent-firefly-398508/rs-docker/vllm/base:cuda11.8.0-ubuntu22.04-python310v0.1 -f docker/base.dockerfile .
 ```
 
 ### 3. Push the Base Docker Image to the Registry
@@ -31,6 +29,6 @@ docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/ardent-firefly
 Once the build completes, push the Docker image to the Google Cloud Artifacts Registry using:
 
 ```bash
-docker push us-central1-docker.pkg.dev/ardent-firefly-398508/llm-experiments/vllm/base:v0.1
+docker push us-central1-docker.pkg.dev/ardent-firefly-398508/rs-docker/vllm/base:cuda11.8.0-ubuntu22.04-python310v0.1
 ```
 ---
