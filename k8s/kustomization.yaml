@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: laas
+
+resources:
+  - ./deploy.yaml
+  
+commonLabels:
+  app: vllm-laas
+
+images:
+  - name: vllm-image  # Adjust this name to match the name in your deployment.yaml
+    newName: us-central1-docker.pkg.dev/ardent-firefly-398508/rs-docker/vllm/vllm
+    newTag: cuda11.8.0-ubuntu22.04-python310v0.1

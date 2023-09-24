@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-llama2-7b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: vllm-llama2-7b-layer
+  template:
+    metadata:
+      labels:
+        component: vllm-llama2-7b-layer
+    spec:
+      serviceAccountName: laas-rs-sa
+      containers:
+      - name: vllm-llama2-7b-container
+        image: vllm-image
+        command:
+          - python 
+          - -m 
+          - vllm.entrypoints.openai.api_server
+          - --model
+          - facebook/opt-125m
+        ports:
+          - containerPort: 8000
+        resources:
+          limits:
+            nvidia.com/gpu: 1
