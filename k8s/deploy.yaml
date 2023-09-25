@@ -17,9 +17,13 @@ spec:
       - name: vllm-llama2-7b-container
         image: vllm-image
         command:
-          - python 
+          - python3 
           - -m 
           - vllm.entrypoints.openai.api_server
+          - --host
+          - "127.0.0.1"
+          - --port 
+          - "8000"
           - --model
           - facebook/opt-125m
         ports:

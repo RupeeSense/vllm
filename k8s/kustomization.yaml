@@ -3,6 +3,8 @@ kind: Kustomization
 namespace: laas
 
 resources:
+  - ./namespace.yaml
+  - ./serviceaccount.yaml
   - ./deploy.yaml
   
 commonLabels:
@@ -11,4 +13,4 @@ commonLabels:
 images:
   - name: vllm-image  # Adjust this name to match the name in your deployment.yaml
     newName: us-central1-docker.pkg.dev/ardent-firefly-398508/rs-docker/vllm/vllm
-    newTag: cuda11.8.0-ubuntu22.04-python310v0.1
+    newTag: cuda11.8.0-ubuntu22.04-python310v0.5

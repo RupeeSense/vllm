@@ -14,9 +14,6 @@ RUN apt-get update --yes && \
     rm -rf /var/lib/apt/lists/* && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 
-# Create vllm user
-RUN useradd -ms /bin/bash vllm
-
 # Set up Python and pip as root
 RUN ln -s /usr/bin/python3.10 /usr/bin/python && \
     rm /usr/bin/python3 && \
@@ -25,20 +22,10 @@ RUN ln -s /usr/bin/python3.10 /usr/bin/python && \
     python get-pip.py && \
     rm get-pip.py
 
-# Setup virtual environment and install packages
-RUN python3 -m venv /home/vllm/venvs/vllm && \
-    chown -R vllm:vllm /home/vllm/venvs/vllm
-
-# Switch to vllm user
-USER vllm
-
-# Define environment variable to use virtual environment
-ENV PATH="/home/vllm/venvs/vllm/bin:$PATH"
-ENV PYTHON_EXECUTABLE=python3
 ENV APP_HOME /home/vllm/
 WORKDIR $APP_HOME
 
 # Activate virtual environment and install packages
-RUN . /home/vllm/venvs/vllm/bin/activate && \
-    pip install --upgrade pip && \
-    pip install --no-cache-dir "pandas>=1.3"
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir "pandas>=1.3" && \
+    rm -rf /root/.cache/pip
