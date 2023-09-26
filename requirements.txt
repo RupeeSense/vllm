@@ -9,6 +9,8 @@ torch >= 2.0.0
 transformers >= 4.33.1  # Required for Code Llama.
 xformers >= 0.0.21
 fastapi
+fschat
+accelerator
 prometheus-fastapi-instrumentator
 uvicorn
 pydantic < 2  # Required for OpenAI server.

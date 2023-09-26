@@ -9,6 +9,7 @@ To create and activate a new Conda environment named `rs-vllm`:
 ```bash
 conda create -n rs-vllm python=3.10 -y
 conda activate rs-vllm
+conda install -c conda-forge accelerate
 ```
 
 ## Building `vllm` from Source
@@ -34,14 +35,15 @@ python -m vllm.entrypoints.openai.api_server \
 
 ### Sample test request
 
-```bash
-curl http://localhost:8000/v1/completions \
+```python
+curl http://localhost:8000/v1/chat/completions \
     -H "Content-Type: application/json" \
     -d '{
         "model": "meta-llama/Llama-2-7b-hf",
-        "prompt": "Hello! How are you?",
+        "messages": '[{"role":"system", "content": "be a good bot! "}, {"role": "user", "content": "Hi, how are you?"}]',
         "max_tokens": 1024,
-        "temperature": 0
+        "temperature": 0.8,
+        "ignore_eos": false
     }'
 ```
 
@@ -51,6 +53,22 @@ To generate distribution archives:
 
 ```bash
 python setup.py sdist bdist_wheel  # This may take several minutes.
+```
+
+## Setting vanilla llama2 for testing
+```bash
+cd ~
+conda create -n rs-vanilla-llama python=3.10 -y
+conda activate rs-vanilla-llama
+git clone https://github.com/facebookresearch/llama.git
+cd llama
+pip install -r requirements.txt
+mkdir llama-model
+gsutil cp -r gs://llm-experiments-bucket/ llama-model/
+torchrun --nproc_per_node 1 example_chat_completion.py \
+    --ckpt_dir llama-model/llm-experiments-bucket/llama-model/llama-2-7b/ \
+    --tokenizer_path llama-model/llm-experiments-bucket/llama-model/tokenizer.model \
+    --max_seq_len 512 --max_batch_size 6
 ```
 
 ## Pushing the Built VLLM Package to GCP Artifacts Registry
