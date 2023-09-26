@@ -30,6 +30,7 @@ from vllm.outputs import RequestOutput
 from vllm.sampling_params import SamplingParams
 from vllm.transformers_utils.tokenizer import get_tokenizer
 from vllm.utils import random_uuid
+from prometheus_fastapi_instrumentator import Instrumentator
 
 try:
     import fastchat
@@ -46,6 +47,11 @@ served_model = None
 app = fastapi.FastAPI()
 engine = None
 
+instrumentator = Instrumentator().instrument(app)
+
+@app.on_event("startup")
+async def _startup():
+    instrumentator.expose(app)
 
 def create_error_response(status_code: HTTPStatus,
                           message: str) -> JSONResponse:

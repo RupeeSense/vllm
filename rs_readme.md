@@ -22,6 +22,29 @@ pip install -r requirements.txt
 pip install -e .  # This may take several minutes.
 ```
 
+### To run locally
+
+To get hf access token: https://huggingface.co/settings/tokens
+
+```bash
+huggingface-cli login
+python -m vllm.entrypoints.openai.api_server \
+--model meta-llama/Llama-2-7b-hf
+```
+
+### Sample test request
+
+```bash
+curl http://localhost:8000/v1/completions \
+    -H "Content-Type: application/json" \
+    -d '{
+        "model": "meta-llama/Llama-2-7b-hf",
+        "prompt": "Hello! How are you?",
+        "max_tokens": 1024,
+        "temperature": 0
+    }'
+```
+
 ### Creating Distribution Archives
 
 To generate distribution archives:
