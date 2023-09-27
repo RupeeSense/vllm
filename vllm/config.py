@@ -135,7 +135,8 @@ class ModelConfig:
         # FIXME(woosuk): This may not be true for all models.
         return self.hf_config.hidden_size // self.hf_config.num_attention_heads
 
-    def get_num_heads(self, parallel_config: "ParallelConfig") -> int:
+    def get_num_kv_heads(self, parallel_config: "ParallelConfig") -> int:
+        """Returns the number of KV heads per GPU worker."""
         # For GPTBigCode & Falcon:
         # Note: for falcon, when new_decoder_architecture is True, the
         # multi_query flag is ignored and we use n_head_kv for the number of
@@ -147,10 +148,14 @@ class ModelConfig:
         if not new_decoder_arch_falcon and getattr(self.hf_config,
                                                    "multi_query", False):
             # Multi-query attention, only one KV head.
+            # Currently, tensor parallelism is not supported in this case.
             return 1
         # For Falcon:
         if getattr(self.hf_config, "n_head_kv", None) is not None:
             return (self.hf_config.n_head_kv //
+                    parallel_config.tensor_parallel_size)
+        if getattr(self.hf_config, "num_kv_heads", None) is not None:
+            return (self.hf_config.num_kv_heads //
                     parallel_config.tensor_parallel_size)
         # For LLaMA-2:
         if getattr(self.hf_config, "num_key_value_heads", None) is not None:
@@ -345,6 +350,17 @@ def _get_and_verify_max_len(
         max_len_key = getattr(hf_config, key, None)
         if max_len_key is not None:
             derived_max_model_len = min(derived_max_model_len, max_len_key)
+
+    rope_scaling = getattr(hf_config, "rope_scaling", None)
+    if rope_scaling is not None:
+        if derived_max_model_len == float("inf"):
+            raise ValueError(
+                "When using rope_scaling, the model's config.json must "
+                "contain one of the following keys to determine the original "
+                f"maximum length of the model: {possible_keys}")
+        assert "factor" in rope_scaling
+        scaling_factor = rope_scaling["factor"]
+        derived_max_model_len *= scaling_factor
 
     if max_model_len is None:
         max_model_len = derived_max_model_len
