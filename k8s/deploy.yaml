@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-llama2-7b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: vllm-llama2-7b-layer
+  template:
+    metadata:
+      labels:
+        component: vllm-llama2-7b-layer
+    spec:
+      serviceAccountName: laas-rs-sa
+      containers:
+      - name: vllm-llama2-7b-container
+        image: vllm-image
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            export HF_TOKEN=$(echo $LAAS_SECRET_FILE_CONTENT | cut -d'=' -f2) && \
+            huggingface-cli login --token $HF_TOKEN && \
+            python3 -m vllm.entrypoints.openai.api_server \
+              --host 127.0.0.1 --port 8000 \
+              --model meta-llama/Llama-2-7b-chat-hf
+        ports:
+          - containerPort: 8000
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+        env:
+          - name: LAAS_SECRET_FILE_CONTENT
+            valueFrom:
+              secretKeyRef:
+                name: laas-secret
+                key: credentials.txt

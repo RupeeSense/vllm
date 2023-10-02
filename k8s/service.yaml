@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-llama2-7b-service
+spec:
+  selector:
+    component: vllm-llama2-7b-layer  # This matches the labels of the Pods created by the Deployment
+  ports:
+    - protocol: TCP
+      port: 80                        # Port that the service will listen on
+      targetPort: 8000                # Port the matched Pods are listening on
